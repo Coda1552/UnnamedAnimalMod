@@ -1,59 +1,56 @@
 package teamdraco.unnamedanimalmod.client.model;
 
-import com.google.common.collect.ImmutableList;
-import teamdraco.unnamedanimalmod.common.entity.BlackDiamondStingrayEntity;
-import net.minecraft.client.renderer.entity.model.SegmentedModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 
-@OnlyIn(Dist.CLIENT)
-public class BlackDiamondStingrayModel<T extends Entity> extends SegmentedModel<BlackDiamondStingrayEntity> {
-    public ModelRenderer body;
-    public ModelRenderer finRight;
-    public ModelRenderer finLeft;
-    public ModelRenderer bodyBottom;
-    public ModelRenderer tail;
+public class BlackDiamondStingrayModel<T extends LivingEntity> extends EntityModel<T> {
+	private final ModelPart body;
+	private final ModelPart finRight;
+	private final ModelPart finLeft;
+	private final ModelPart tail;
 
-    public BlackDiamondStingrayModel() {
-        this.texWidth = 64;
-        this.texHeight = 32;
-        this.tail = new ModelRenderer(this, 0, 12);
-        this.tail.setPos(0.0F, -0.5F, 7.0F);
-        this.tail.addBox(-1.0F, -0.5F, 0.0F, 2.0F, 1.0F, 11.0F, 0.0F, 0.0F, 0.0F);
-        this.finRight = new ModelRenderer(this, 27, 12);
-        this.finRight.mirror = true;
-        this.finRight.setPos(3.0F, 0.0F, 1.0F);
-        this.finRight.addBox(0.0F, -1.0F, -5.0F, 3.0F, 1.0F, 11.0F, 0.0F, 0.0F, 0.0F);
-        this.bodyBottom = new ModelRenderer(this, 19, 0);
-        this.bodyBottom.setPos(0.0F, 0.0F, -2.0F);
-        this.bodyBottom.addBox(-3.0F, -1.0F, -2.0F, 6.0F, 1.0F, 11.0F, 0.0F, 0.0F, 0.0F);
-        this.body = new ModelRenderer(this, 0, 0);
-        this.body.setPos(0.0F, 23.0F, -2.0F);
-        this.body.addBox(-3.0F, -2.0F, -2.0F, 6.0F, 1.0F, 8.0F, 0.0F, 0.0F, 0.0F);
-        this.finLeft = new ModelRenderer(this, 27, 12);
-        this.finLeft.setPos(-3.0F, 0.0F, 1.0F);
-        this.finLeft.addBox(-3.0F, -1.0F, -5.0F, 3.0F, 1.0F, 11.0F, 0.0F, 0.0F, 0.0F);
-        this.body.addChild(this.tail);
-        this.body.addChild(this.finRight);
-        this.body.addChild(this.bodyBottom);
-        this.body.addChild(this.finLeft);
-    }
+	public BlackDiamondStingrayModel(ModelPart root) {
+		this.body = root.getChild("body");
+		this.finRight = body.getChild("finRight");
+		this.finLeft = body.getChild("finLeft");
+		this.tail = body.getChild("tail");
+	}
 
-    @Override
-    public void setupAnim(BlackDiamondStingrayEntity entityIn, float f, float f1, float ageInTicks, float netHeadYaw, float headPitch) {
-        float speed = 5.0f;
-        float degree = 2.0f;
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshdefinition = new MeshDefinition();
+		PartDefinition partdefinition = meshdefinition.getRoot();
 
-        this.finLeft.zRot = MathHelper.cos(f * speed * 0.2F) * degree * 0.4F * f1 + 0.1F;
-        this.finRight.zRot = MathHelper.cos(f * speed * 0.2F) * degree * -0.4F * f1 - 0.1F;
-        this.tail.yRot = MathHelper.cos(f * speed * 0.3F) * degree * 0.2F * f1;
-    }
+		PartDefinition body = partdefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 0).addBox(-3.0F, -2.0F, -2.0F, 6.0F, 1.0F, 8.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 23.0F, -2.0F));
 
-    @Override
-    public Iterable<ModelRenderer> parts() {
-        return ImmutableList.of(this.body);
-    }
+		PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(0, 12).addBox(-1.0F, -0.5F, 0.0F, 2.0F, 1.0F, 11.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, -0.5F, 7.0F));
+
+		PartDefinition finRight = body.addOrReplaceChild("finRight", CubeListBuilder.create().texOffs(27, 12).mirror().addBox(0.0F, -1.0F, -5.0F, 3.0F, 1.0F, 11.0F, new CubeDeformation(0.0F)).mirror(false), PartPose.offset(3.0F, 0.0F, 1.0F));
+
+		PartDefinition bodyBottom = body.addOrReplaceChild("bodyBottom", CubeListBuilder.create().texOffs(19, 0).addBox(-3.0F, -1.0F, -2.0F, 6.0F, 1.0F, 11.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, -2.0F));
+
+		PartDefinition finLeft = body.addOrReplaceChild("finLeft", CubeListBuilder.create().texOffs(27, 12).addBox(-3.0F, -1.0F, -5.0F, 3.0F, 1.0F, 11.0F, new CubeDeformation(0.0F)), PartPose.offset(-3.0F, 0.0F, 1.0F));
+
+		return LayerDefinition.create(meshdefinition, 64, 32);
+	}
+
+	@Override
+	public void setupAnim(T entity, float f, float f1, float ageInTicks, float netHeadYaw, float headPitch) {
+		float speed = 5.0f;
+		float degree = 2.0f;
+
+		this.finLeft.zRot = Mth.cos(f * speed * 0.2F) * degree * 0.4F * f1 + 0.1F;
+		this.finRight.zRot = Mth.cos(f * speed * 0.2F) * degree * -0.4F * f1 - 0.1F;
+		this.tail.yRot = Mth.cos(f * speed * 0.3F) * degree * 0.2F * f1;
+	}
+
+	@Override
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+		body.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
+	}
 }

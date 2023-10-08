@@ -1,64 +1,48 @@
 package teamdraco.unnamedanimalmod.client.model;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import teamdraco.unnamedanimalmod.common.entity.SpottedGardenEelEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 
-@OnlyIn(Dist.CLIENT)
-public class SpottedGardenEelHidingModel extends EntityModel<SpottedGardenEelEntity> {
-    public ModelRenderer body;
-    public ModelRenderer tail;
-    public ModelRenderer head;
+public class SpottedGardenEelHidingModel<T extends LivingEntity> extends EntityModel<T> {
+	private final ModelPart body;
+	private final ModelPart tail;
 
-    public SpottedGardenEelHidingModel() {
-        this.texWidth = 32;
-        this.texHeight = 38;
-        this.body = new ModelRenderer(this, 0, 6);
-        this.body.setPos(0.0F, 25.0F, 1.0F);
-        this.body.addBox(-1.0F, -1.0F, -12.0F, 2.0F, 2.0F, 14.0F, 0.0F, 0.0F, 0.0F);
-        this.setRotateAngle(body, -1.5707963267948966F, 0.0F, 0.0F);
-        this.tail = new ModelRenderer(this, 0, 22);
-        this.tail.setPos(0.0F, 0.0F, 2.0F);
-        this.tail.addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 14.0F, 0.0F, 0.0F, 0.0F);
-        this.head = new ModelRenderer(this, 8, 0);
-        this.head.setPos(0.0F, 1.0F, -11.0F);
-        this.head.addBox(-1.0F, -1.0F, -3.0F, 2.0F, 2.0F, 3.0F, 0.0F, 0.0F, 0.0F);
-        this.setRotateAngle(head, 1.5707963267948966F, 0.0F, 0.0F);
-        this.body.addChild(this.tail);
-        this.body.addChild(this.head);
-    }
+	public SpottedGardenEelHidingModel(ModelPart root) {
+		this.body = root.getChild("body");
+		this.tail = body.getChild("tail");
+	}
 
-    @Override
-    public void renderToBuffer(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
-        ImmutableList.of(this.body).forEach((modelRenderer) -> { 
-            modelRenderer.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-        });
-    }
+	public static LayerDefinition createBodyLayer() {
+		MeshDefinition meshdefinition = new MeshDefinition();
+		PartDefinition partdefinition = meshdefinition.getRoot();
 
-    @Override
-    public void setupAnim(SpottedGardenEelEntity entityIn, float f, float f1, float ageInTicks, float netHeadYaw, float headPitch) {
-    }
+		PartDefinition body = partdefinition.addOrReplaceChild("body", CubeListBuilder.create().texOffs(0, 6).addBox(-1.0F, -1.0F, -12.0F, 2.0F, 2.0F, 14.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 25.0F, 1.0F, -1.5708F, 0.0F, 0.0F));
 
-    @Override
-    public void prepareMobModel(SpottedGardenEelEntity entityIn, float f, float f1, float partialTick) {
-        super.prepareMobModel(entityIn, f, f1, partialTick);
-        if(entityIn.isInWater()) {
-            float speed = 1.0f;
-            float degree = 1.0f;
-            this.body.zRot = MathHelper.cos(entityIn.tickCount * speed * 0.1F) * degree * 0.3F;
-            this.tail.visible = false;
-        }
-    }
+		PartDefinition tail = body.addOrReplaceChild("tail", CubeListBuilder.create().texOffs(0, 22).addBox(-1.0F, -1.0F, 0.0F, 2.0F, 2.0F, 14.0F, new CubeDeformation(0.0F)), PartPose.offset(0.0F, 0.0F, 2.0F));
 
-    public void setRotateAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-        modelRenderer.xRot = x;
-        modelRenderer.yRot = y;
-        modelRenderer.zRot = z;
-    }
+		PartDefinition head = body.addOrReplaceChild("head", CubeListBuilder.create().texOffs(8, 0).addBox(-1.0F, -1.0F, -3.0F, 2.0F, 2.0F, 3.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, 1.0F, -11.0F, 1.5708F, 0.0F, 0.0F));
+
+		return LayerDefinition.create(meshdefinition, 32, 38);
+	}
+
+	@Override
+	public void setupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+		if(entity.isInWater()) {
+			float speed = 1.0f;
+			float degree = 1.0f;
+			this.body.zRot = Mth.cos(ageInTicks * speed * 0.1F) * degree * 0.3F;
+			this.tail.visible = false;
+		}
+	}
+
+	@Override
+	public void renderToBuffer(PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+		body.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
+	}
 }

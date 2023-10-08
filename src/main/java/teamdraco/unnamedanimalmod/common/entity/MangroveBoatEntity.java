@@ -1,30 +1,29 @@
 package teamdraco.unnamedanimalmod.common.entity;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import teamdraco.unnamedanimalmod.init.UAMBlocks;
 import teamdraco.unnamedanimalmod.init.UAMEntities;
 import teamdraco.unnamedanimalmod.init.UAMItems;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.BoatEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.network.IPacket;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
 
-public class MangroveBoatEntity extends BoatEntity {
-    public MangroveBoatEntity(EntityType<? extends MangroveBoatEntity> type, World world) {
+public class MangroveBoatEntity extends Boat {
+    public MangroveBoatEntity(EntityType<? extends MangroveBoatEntity> type, net.minecraft.world.level.Level world) {
         super(type, world);
     }
 
-    public MangroveBoatEntity(World worldIn, double x, double y, double z) {
+    public MangroveBoatEntity(Level worldIn, double x, double y, double z) {
         super(UAMEntities.MANGROVE_BOAT.get(), worldIn);
         this.setPos(x, y, z);
-        this.setDeltaMovement(Vector3d.ZERO);
+        this.setDeltaMovement(Vec3.ZERO);
         this.xo = x;
         this.yo = y;
         this.zo = z;
@@ -41,15 +40,15 @@ public class MangroveBoatEntity extends BoatEntity {
 //                        return;
 //                    }
 
-                    this.causeFallDamage(this.fallDistance, 1.0F);
+                    this.causeFallDamage(this.fallDistance, 1.0F, DamageSource.FALL);
                     if (!this.level.isClientSide && isAlive()) {
-                        this.remove();
+                        this.discard();
                         if (this.level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-                            for(int i = 0; i < 3; ++i) {
+                            for (int i = 0; i < 3; ++i) {
                                 this.spawnAtLocation(UAMBlocks.MANGROVE_PLANKS.get());
                             }
 
-                            for(int j = 0; j < 2; ++j) {
+                            for (int j = 0; j < 2; ++j) {
                                 this.spawnAtLocation(Items.STICK);
                             }
                         }
@@ -58,7 +57,7 @@ public class MangroveBoatEntity extends BoatEntity {
 
                 this.fallDistance = 0.0F;
             } else if (!this.level.getFluidState(this.blockPosition().below()).is(FluidTags.WATER) && y < 0.0D) {
-                this.fallDistance = (float)((double)this.fallDistance - y);
+                this.fallDistance = (float) ((double) this.fallDistance - y);
             }
         }
     }
@@ -68,8 +67,4 @@ public class MangroveBoatEntity extends BoatEntity {
         return UAMItems.MANGROVE_BOAT.get();
     }
 
-    @Override
-    public IPacket<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
 }

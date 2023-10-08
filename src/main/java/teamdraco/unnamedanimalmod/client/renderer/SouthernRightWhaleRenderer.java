@@ -1,13 +1,14 @@
 package teamdraco.unnamedanimalmod.client.renderer;
 
 import com.google.common.collect.Maps;
+import net.minecraft.Util;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.resources.ResourceLocation;
+import teamdraco.unnamedanimalmod.UAMModelLayers;
 import teamdraco.unnamedanimalmod.UnnamedAnimalMod;
 import teamdraco.unnamedanimalmod.client.model.SouthernRightWhaleModel;
 import teamdraco.unnamedanimalmod.common.entity.SouthernRightWhaleEntity;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -22,8 +23,8 @@ public class SouthernRightWhaleRenderer extends MobRenderer<SouthernRightWhaleEn
         hashMap.put(3, new ResourceLocation(UnnamedAnimalMod.MOD_ID, "textures/entity/southern_right_whale/southern_right_whale_4.png"));
     });
 
-    public SouthernRightWhaleRenderer(EntityRendererManager renderManagerIn) {
-        super(renderManagerIn, new SouthernRightWhaleModel<>(), 2.25F);
+    public SouthernRightWhaleRenderer(EntityRendererProvider.Context renderManagerIn) {
+        super(renderManagerIn, new SouthernRightWhaleModel<>(renderManagerIn.bakeLayer(UAMModelLayers.SOUTHERN_RIGHT_WHALE)), 2.25F);
     }
 
     public ResourceLocation getTextureLocation(SouthernRightWhaleEntity entity) {

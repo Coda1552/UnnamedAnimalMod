@@ -1,22 +1,21 @@
 package teamdraco.unnamedanimalmod.common.worldgen.trees.mangrove;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.VineBlock;
 import teamdraco.unnamedanimalmod.UAMHelper;
 import teamdraco.unnamedanimalmod.common.block.MangroveSaplingBlock;
 import teamdraco.unnamedanimalmod.init.UAMBlocks;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.block.VineBlock;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ISeedReader;
-import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
 
-public class MangroveTreeHelper
-{
+public class MangroveTreeHelper {
     //NOTE all random values below have 1 added to them when randomizing, the values determine the maximum possible output, not number of outputs
     //region land
     //trunk placement
@@ -58,38 +57,28 @@ public class MangroveTreeHelper
     public static int minimumVineHeight = 7; //the minimum possible height of vines
     public static int vineHeightExtra = 2; //I don't think I need to even write anything here
 
-    public static void fill(ISeedReader reader, ArrayList<Entry> filler)
-    {
-        for (Entry entry : filler)
-        {
+    public static void fill(WorldGenLevel reader, ArrayList<Entry> filler) {
+        for (Entry entry : filler) {
             reader.setBlock(entry.pos, entry.state, 3);
         }
     }
 
-    public static void fillLeaves(ISeedReader reader, Random rand, ArrayList<Entry> filler)
-    {
+    public static void fillLeaves(WorldGenLevel reader, RandomSource rand, ArrayList<Entry> filler) {
         Collection<Entry> vineFiller = UAMHelper.takeAll(filler, p -> p.state.getBlock() instanceof VineBlock);
-        for (Entry entry : filler)
-        {
-            if (canPlace(reader, entry.pos))
-            {
+        for (Entry entry : filler) {
+            if (canPlace(reader, entry.pos)) {
                 reader.setBlock(entry.pos, entry.state, 3);
             }
         }
-        for (Entry entry : vineFiller)
-        {
-            if (canPlace(reader, entry.pos))
-            {
+        for (Entry entry : vineFiller) {
+            if (canPlace(reader, entry.pos)) {
                 int vinesLength = minimumVineHeight + rand.nextInt(vineHeightExtra + 1);
-                for (int i = 0; i < vinesLength; i++)
-                {
+                for (int i = 0; i < vinesLength; i++) {
                     BlockPos vinePos = entry.pos.below(i);
-                    if (canPlace(reader, vinePos) && !reader.isWaterAt(vinePos))
-                    {
+                    if (canPlace(reader, vinePos) && !reader.isWaterAt(vinePos)) {
                         reader.setBlock(vinePos, entry.state, 3);
                     }
-                    else
-                    {
+                    else {
                         break;
                     }
                 }
@@ -97,65 +86,50 @@ public class MangroveTreeHelper
         }
     }
 
-    public static void makeLeafBlob(ArrayList<Entry> filler, Random rand, BlockPos pos, int branchHeight)
-    {
+    public static void makeLeafBlob(ArrayList<Entry> filler, RandomSource rand, BlockPos pos, int branchHeight) {
         int randomOffset = rand.nextInt(leavesStartDownwardsOffsetExtra + 1);
         int startingLeavesOffset = branchHeight - randomOffset;
         int finalLeavesHeight = leavesHeight + rand.nextInt(leavesHeightExtra + 1);
 
         int size = leavesSize - 1 + rand.nextInt(leavesSizeExtra);
-        for (int i = 0; i < finalLeavesHeight; i++)
-        {
+        for (int i = 0; i < finalLeavesHeight; i++) {
             int y = startingLeavesOffset + i;
             BlockPos blobSliceCenter = pos.above(y);
-            if (i < leavesShrinkStart)
-            {
+            if (i < leavesShrinkStart) {
                 size++;
             }
-            else
-            {
+            else {
                 size--;
             }
             makeLeafSlice(filler, rand, blobSliceCenter, size, i < leavesShrinkStart);
         }
     }
 
-    public static void makeLeafSlice(ArrayList<Entry> filler, Random rand, BlockPos pos, int leavesSize, boolean vines)
-    {
-        for (int x = -leavesSize; x <= leavesSize; x++)
-        {
-            for (int z = -leavesSize; z <= leavesSize; z++)
-            {
-                if (Math.abs(x) == leavesSize && Math.abs(z) == leavesSize)
-                {
+    public static void makeLeafSlice(ArrayList<Entry> filler, RandomSource rand, BlockPos pos, int leavesSize, boolean vines) {
+        for (int x = -leavesSize; x <= leavesSize; x++) {
+            for (int z = -leavesSize; z <= leavesSize; z++) {
+                if (Math.abs(x) == leavesSize && Math.abs(z) == leavesSize) {
                     continue;
                 }
                 BlockPos leavesPos = new BlockPos(pos).offset(x, 0, z);
-                if (rand.nextFloat() > 0.15f)
-                {
+                if (rand.nextFloat() > 0.15f) {
 
                     filler.add(new Entry(leavesPos, UAMBlocks.MANGROVE_LEAVES.get().defaultBlockState().setValue(LeavesBlock.DISTANCE, 1)));
                 }
-                else
-                {
+                else {
                     filler.add(new Entry(leavesPos, UAMBlocks.FLOWERING_MANGROVE_LEAVES.get().defaultBlockState().setValue(LeavesBlock.DISTANCE, 1)));
                 }
 
-                if (vines)
-                {
-                    if (Math.abs(x) == leavesSize || Math.abs(z) == leavesSize)
-                    {
-                        if (rand.nextFloat() < 0.2f)
-                        {
+                if (vines) {
+                    if (Math.abs(x) == leavesSize || Math.abs(z) == leavesSize) {
+                        if (rand.nextFloat() < 0.2f) {
                             Direction[] directions = new Direction[]{Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST};
-                            for (Direction direction : directions)
-                            {
+                            for (Direction direction : directions) {
                                 filler.add(new Entry(leavesPos.relative(direction), Blocks.VINE.defaultBlockState().setValue(VineBlock.PROPERTY_BY_DIRECTION.get(direction.getOpposite()), true)));
                             }
                         }
                     }
-                    if (rand.nextFloat() < 0.1F)
-                    {
+                    if (rand.nextFloat() < 0.1F) {
                         filler.add(new Entry(leavesPos.below(), UAMBlocks.MANGROVE_FRUIT.get().defaultBlockState()));
                     }
                 }
@@ -163,10 +137,8 @@ public class MangroveTreeHelper
         }
     }
 
-    public static boolean canPlace(ISeedReader reader, BlockPos pos)
-    {
-        if (!World.isInWorldBounds(pos))
-        {
+    public static boolean canPlace(WorldGenLevel reader, BlockPos pos) {
+        if (!reader.isOutsideBuildHeight(pos)) {
             return false;
         }
         return (reader.getBlockState(pos).getBlock() instanceof MangroveSaplingBlock || reader.isWaterAt(pos) || reader.isEmptyBlock(pos) || reader.getBlockState(pos).getMaterial().isReplaceable());

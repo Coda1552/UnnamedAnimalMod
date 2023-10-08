@@ -1,13 +1,14 @@
 package teamdraco.unnamedanimalmod.client.renderer;
 
 import com.google.common.collect.Maps;
+import net.minecraft.Util;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.resources.ResourceLocation;
+import teamdraco.unnamedanimalmod.UAMModelLayers;
 import teamdraco.unnamedanimalmod.UnnamedAnimalMod;
 import teamdraco.unnamedanimalmod.client.model.MangroveSnakeModel;
 import teamdraco.unnamedanimalmod.common.entity.MangroveSnakeEntity;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -20,8 +21,8 @@ public class MangroveSnakeRenderer extends MobRenderer<MangroveSnakeEntity, Mang
         hashMap.put(1, new ResourceLocation(UnnamedAnimalMod.MOD_ID, "textures/entity/mangrove_snake/mangrove_snake_sulawesi.png"));
     });
 
-    public MangroveSnakeRenderer(EntityRendererManager renderManagerIn) {
-        super(renderManagerIn, new MangroveSnakeModel<>(), 0.5F);
+    public MangroveSnakeRenderer(EntityRendererProvider.Context renderManagerIn) {
+        super(renderManagerIn, new MangroveSnakeModel<>(renderManagerIn.bakeLayer(UAMModelLayers.MANGROVE_SNAKE)), 0.5F);
     }
 
     public ResourceLocation getTextureLocation(MangroveSnakeEntity entity) {

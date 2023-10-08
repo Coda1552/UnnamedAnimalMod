@@ -1,28 +1,32 @@
 package teamdraco.unnamedanimalmod.common.worldgen.trees.mangrove;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import teamdraco.unnamedanimalmod.init.UAMBlocks;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.block.RotatedPillarBlock;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ISeedReader;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.NoFeatureConfig;
 
 import java.util.ArrayList;
-import java.util.Random;
 
-import static net.minecraft.world.gen.feature.NoFeatureConfig.CODEC;
-
-public class MangroveLandTreeFeature extends Feature<NoFeatureConfig> {
+public class MangroveLandTreeFeature extends Feature<NoneFeatureConfiguration> {
     public MangroveLandTreeFeature() {
-        super(CODEC);
+        super(NoneFeatureConfiguration.CODEC);
     }
 
     @Override
-    public boolean place(ISeedReader reader, ChunkGenerator generator, Random rand, BlockPos pos, NoFeatureConfig config) {
+    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
+        return place(context.config(), context.level(), context.chunkGenerator(), context.random(), context.origin());
+    }
+
+    @Override
+    public boolean place(NoneFeatureConfiguration config, WorldGenLevel reader, ChunkGenerator generator, RandomSource rand, BlockPos pos) {
         if (reader.isEmptyBlock(pos.below()) || reader.getBlockState(pos.below()).getBlock() instanceof LeavesBlock) {
             return false;
         }

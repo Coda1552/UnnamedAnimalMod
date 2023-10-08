@@ -1,24 +1,23 @@
 package teamdraco.unnamedanimalmod.common.entity;
 
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.animal.AbstractSchoolingFish;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import teamdraco.unnamedanimalmod.init.UAMItems;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.passive.fish.AbstractGroupFishEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
-public class RocketKillifishEntity extends AbstractGroupFishEntity {
-    public RocketKillifishEntity(EntityType<? extends AbstractGroupFishEntity> type, World worldIn) {
+public class RocketKillifishEntity extends AbstractSchoolingFish {
+    public RocketKillifishEntity(EntityType<? extends AbstractSchoolingFish> type, Level worldIn) {
         super(type, worldIn);
     }
 
     @Override
-    protected ItemStack getBucketItemStack() {
+    public ItemStack getBucketItemStack() {
         return new ItemStack(UAMItems.ROCKET_KILLIFISH_BUCKET.get());
     }
 
@@ -44,8 +43,4 @@ public class RocketKillifishEntity extends AbstractGroupFishEntity {
         return 15;
     }
 
-    @Override
-    public ItemStack getPickedResult(RayTraceResult target) {
-        return new ItemStack(UAMItems.ROCKET_KILLIFISH_SPAWN_EGG.get());
-    }
 }

@@ -1,38 +1,36 @@
 package teamdraco.unnamedanimalmod.common.item;
 
-import teamdraco.unnamedanimalmod.common.entity.item.PlatypusEggEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.world.World;
-
-import net.minecraft.item.Item.Properties;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import teamdraco.unnamedanimalmod.common.entity.item.PlatypusEggEntity;
 
 public class PlatypusEggItem extends Item {
     public PlatypusEggItem(Properties builder) {
         super(builder);
     }
 
-    public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
+    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
         ItemStack itemstack = playerIn.getItemInHand(handIn);
-        worldIn.playSound(null, playerIn.getX(), playerIn.getY(), playerIn.getZ(), SoundEvents.EGG_THROW, SoundCategory.NEUTRAL, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
+        worldIn.playSound(null, playerIn.getX(), playerIn.getY(), playerIn.getZ(), SoundEvents.EGG_THROW, SoundSource.NEUTRAL, 0.5F, 0.4F / (playerIn.getRandom().nextFloat() * 0.4F + 0.8F));
         if (!worldIn.isClientSide) {
-            PlatypusEggEntity platypuseggentity = new PlatypusEggEntity(worldIn, playerIn);
-            platypuseggentity.setItem(itemstack);
-            platypuseggentity.shootFromRotation(playerIn, playerIn.xRot, playerIn.yRot, 0.0F, 1.5F, 1.0F);
-            worldIn.addFreshEntity(platypuseggentity);
+            PlatypusEggEntity eggEntity = new PlatypusEggEntity(worldIn, playerIn);
+            eggEntity.setItem(itemstack);
+            eggEntity.shootFromRotation(playerIn, playerIn.getXRot(), playerIn.getYRot(), 0.0F, 1.5F, 1.0F);
+            worldIn.addFreshEntity(eggEntity);
         }
 
         playerIn.awardStat(Stats.ITEM_USED.get(this));
-        if (!playerIn.abilities.instabuild) {
+        if (!playerIn.getAbilities().instabuild) {
             itemstack.shrink(1);
         }
 
-        return ActionResult.sidedSuccess(itemstack, worldIn.isClientSide());
+        return InteractionResultHolder.sidedSuccess(itemstack, worldIn.isClientSide());
     }
 }

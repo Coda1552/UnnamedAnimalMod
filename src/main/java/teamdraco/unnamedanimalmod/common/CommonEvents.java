@@ -1,28 +1,22 @@
 package teamdraco.unnamedanimalmod.common;
 
-import net.minecraft.entity.*;
-import net.minecraft.entity.passive.WolfEntity;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.Biomes;
-import net.minecraft.world.biome.MobSpawnInfo;
-import net.minecraftforge.event.world.BiomeLoadingEvent;
-import teamdraco.unnamedanimalmod.UAMConfig;
-import teamdraco.unnamedanimalmod.common.block.RichFarmlandBlock;
-import teamdraco.unnamedanimalmod.common.entity.MuskOxEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.CropsBlock;
-import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.world.BlockEvent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import teamdraco.unnamedanimalmod.init.UAMEntities;
+import teamdraco.unnamedanimalmod.common.block.RichFarmlandBlock;
+import teamdraco.unnamedanimalmod.common.entity.MuskOxEntity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +24,8 @@ import java.util.List;
 @Mod.EventBusSubscriber
 public class CommonEvents {
 
-    @SubscribeEvent
+    // todo - biome modifiers
+/*    @SubscribeEvent
     public static void doSpawning(BiomeLoadingEvent event) {
         if (event.getCategory() == Biome.Category.JUNGLE) {
             event.getSpawns().getSpawner(EntityClassification.WATER_CREATURE).add(new MobSpawnInfo.Spawners(UAMEntities.BLACK_DIAMOND_STINGRAY.get(), UAMConfig.Common.INSTANCE.blackDiamondStingraySpawnWeight.get(), 1, 1));
@@ -72,19 +67,17 @@ public class CommonEvents {
             event.getSpawns().getSpawner(EntityClassification.CREATURE).add(new MobSpawnInfo.Spawners(UAMEntities.PLATYPUS.get(), UAMConfig.Common.INSTANCE.platypusSpawnWeight.get(), 1, 1));
             event.getSpawns().getSpawner(EntityClassification.CREATURE).add(new MobSpawnInfo.Spawners(UAMEntities.PACMAN_FROG.get(), UAMConfig.Common.INSTANCE.pacmanFrogSpawnWeight.get(), 1, 2));
         }
-    }
+    }*/
 
     @SubscribeEvent
     public static void harvest(BlockEvent.BreakEvent event) {
-        if (event.getWorld() instanceof ServerWorld) {
+        if (event.getLevel() instanceof ServerLevel level) {
             BlockState cropState = event.getState();
-            if (cropState.getBlock() instanceof CropsBlock) {
-                CropsBlock block = (CropsBlock) cropState.getBlock();
-                if (block.isMaxAge(cropState)) {
-                    ServerWorld world = (ServerWorld) event.getWorld();
-                    BlockState farmlandState = world.getBlockState(event.getPos().below());
+            if (cropState.getBlock() instanceof CropBlock cropBlock) {
+                if (cropBlock.isMaxAge(cropState)) {
+                    BlockState farmlandState = level.getBlockState(event.getPos().below());
                     if (farmlandState.getBlock() instanceof RichFarmlandBlock) {
-                        List<ItemStack> drops = Block.getDrops(cropState, world, event.getPos(), null);
+                        List<ItemStack> drops = Block.getDrops(cropState, level, event.getPos(), null);
                         List<ItemStack> uniqueDrops = new ArrayList<>();
                         List<Item> addedItems = new ArrayList<>();
                         drops.forEach(s -> {
@@ -95,15 +88,15 @@ public class CommonEvents {
                         });
                         if (uniqueDrops.size() > 1) {
                             uniqueDrops.forEach(s -> {
-                                if (!(s.getItem() instanceof BlockItem && ((BlockItem) s.getItem()).getBlock() instanceof CropsBlock)) {
-                                    ItemEntity entity = new ItemEntity(world, event.getPos().getX() + 0.5f, event.getPos().getY() + 0.5f, event.getPos().getZ() + 0.5f, s);
-                                    world.addFreshEntity(entity);
+                                if (!(s.getItem() instanceof BlockItem && ((BlockItem) s.getItem()).getBlock() instanceof CropBlock)) {
+                                    ItemEntity entity = new ItemEntity(level, event.getPos().getX() + 0.5f, event.getPos().getY() + 0.5f, event.getPos().getZ() + 0.5f, s);
+                                    level.addFreshEntity(entity);
                                 }
                             });
                         }
                         else {
-                            ItemEntity entity = new ItemEntity(world, event.getPos().getX() + 0.5f, event.getPos().getY() + 0.5f, event.getPos().getZ() + 0.5f, uniqueDrops.get(0));
-                            world.addFreshEntity(entity);
+                            ItemEntity entity = new ItemEntity(level, event.getPos().getX() + 0.5f, event.getPos().getY() + 0.5f, event.getPos().getZ() + 0.5f, uniqueDrops.get(0));
+                            level.addFreshEntity(entity);
                         }
                     }
                 }
@@ -112,10 +105,10 @@ public class CommonEvents {
     }
 
     @SubscribeEvent
-    public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
+    public static void onEntityJoinWorld(EntityJoinLevelEvent event) {
         Entity entity = event.getEntity();
-        if (entity instanceof WolfEntity) {
-            ((WolfEntity) entity).targetSelector.addGoal(0, new NearestAttackableTargetGoal<>((MobEntity) entity, MuskOxEntity.class, true));
+        if (entity instanceof Wolf wolf) {
+            wolf.targetSelector.addGoal(0, new NearestAttackableTargetGoal<>((Wolf) entity, MuskOxEntity.class, true));
         }
     }
 }
